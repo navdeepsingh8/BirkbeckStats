@@ -1,0 +1,322 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{fancyhdr}
+\usepackage[left=2.5cm,top=3.5cm,headheight=2cm,right=3cm,bottom=3cm]{geometry}
+\usepackage{bm}
+\usepackage{amsmath,amssymb}
+\pagestyle{fancyplain}
+\lhead[\thepage]{Navdeep Daheley\\MSc Applied Statistics}
+\rhead[\thepage]{Statistical Analysis B - Coursework 2 - \today}
+\setlength{\parskip}{0.3cm}
+\setlength{\parindent}{0cm}
+
+<<devoff,echo=FALSE,results=hide,eval=FALSE>>=
+dev.off();
+@
+
+\begin{document}
+\setkeys{Gin}{width=0.6\textwidth}
+
+%Question 1
+1.
+\begin{equation}\label{eq:pdf}
+f(y) = \frac{1}{w}[\log w]^y \exp\left(-\sum_{x=2}^y \log x\right)
+\end{equation}
+must be shown to belong to the exponential family, for $y \in \{0,1,2,\dots\}$ and $w > 1$. Distributions from the exponential family have p.d.f.s which can be written in the form
+\begin{equation}\label{eq:expfam}
+f(y)=\exp\left(\frac{y\theta-b(\theta)}{a(\phi)}-c(y,\phi)\right)
+\end{equation}
+where $\theta$ is the {\em canonical} parameter, $\phi$ is a potentially unknown parameter, $a$, $b$ and $c$ are functions of only those parameters shown above.\\
+
+Noting that
+\begin{eqnarray*}
+\frac{1}{w}[\log w]^y & = & \exp\left(\log(\frac{1}{w}[\log w]^y)\right)\\
+											& = & \exp\left(y\log(\log w) - \log w\right)
+\end{eqnarray*}
+then \eqref{eq:pdf} can be written as
+\begin{equation*}
+f(y) =  \exp\left(y\log(\log w) - \log w - \sum_{x=2}^{y}\log x\right)
+\end{equation*}
+which is equivalent to the p.d.f. format for the exponential family \eqref{eq:expfam} by setting
+\begin{eqnarray*}
+\theta & = & \log(\log w)\\
+\phi 	 & = & a(\phi) = 1\\
+b(\theta) & = & e^\theta = \log w\\
+c(y,\phi) & = & \sum_{x=2}^{y} \log x\\
+\end{eqnarray*}
+
+The mean and variance of a distribution belonging to the exponential family can be expressed as
+\begin{eqnarray*}
+\text{E}(Y) & = & b'(\theta)\\
+\text{Var}(Y) & = & b''(\theta)a(\phi)
+\end{eqnarray*}
+For the p.d.f. defined by \eqref{eq:pdf} these evaluate to
+\begin{eqnarray*}
+\text{E}(Y) & = & e^\theta = \log w\\
+\text{Var}(Y) & = & e^\theta = \log w
+\end{eqnarray*}
+
+%Question 2
+\newpage
+2.\\
+We are given that $Y_i \sim B(N_i,\pi_i)$, $i=1,\dots,n$ are mutually independent such that
+\begin{equation}\label{eq:logitlink}
+\log \left(\frac{\pi_i}{1-\pi_i}\right) = \beta_0 + \beta_1 x_i
+\end{equation}
+(a) Working from \eqref{eq:logitlink},
+\begin{eqnarray*}
+\frac{\pi_i}{1-\pi_i} & = & e^{\beta_0 + \beta_1 x_i}\\
+\pi_i\left(1+e^{\beta_0 + \beta_1 x_i}\right) & = & e^{\beta_0 + \beta_1 x_i}\\
+\pi_i & = & \frac{e^{\beta_0 + \beta_1 x_i}}{1+e^{\beta_0 + \beta_1 x_i}}\\
+1-\pi_i & = & \frac{1}{1+e^{\beta_0 + \beta_1 x_i}}
+\end{eqnarray*}
+
+(b) The relationship between $\pi$ and $x$ for $\beta_0<0$ and $\beta_1>0$ is shown below. $\pi$ is bounded by 0 and 1 and the value of $\pi$ when $x=0$ is $e^{\beta_0}/(1+e^{\beta_0})$.
+\begin{figure}[h]
+\begin{center}
+<<echo=FALSE,output=FALSE,fig=TRUE>>==
+lin.pred <- function(x,beta0,beta1) {
+  exp(beta0+beta1*x);
+}
+x.val <- seq(-10,10,0.01);
+lin.pred.val <- lin.pred(x.val,beta0=-2,beta1=1);
+pi.val <- lin.pred.val/(1+lin.pred.val);
+op<-par(pty="s",mar=c(4.5,4,3,3));
+plot(x.val,pi.val,type="l",ylim=c(0,1),xlab=expression(x),ylab=expression(pi));
+pi.intc <- lin.pred(0,-2,0)/(1+lin.pred(0,-2,0));
+abline(0,0,lty=3); abline(1,0,lty=3); abline(v=0,lty=2); abline(pi.intc,0,lty=3);
+par(op);
+@
+\end{center}
+\end{figure}
+
+(c)
+<<echo=FALSE,output=FALSE>>==
+beta0.hat <- -1.24;
+beta1.hat <- 0.054;
+x.i <- 3;
+N.i <- 50;
+
+lin.pred.i <- exp(beta0.hat+beta1.hat*x.i);
+mu.i.hat <- N.i*lin.pred(x.i,beta0.hat,beta1.hat)/
+            (1+lin.pred(x.i,beta0.hat,beta1.hat));
+@
+\begin{eqnarray*}
+\hat\mu_i & = & N_i\hat\pi_i\\
+					& = & \frac{N_ie^{\hat\beta_0 + \hat\beta_1 x_i}}{1+e^{\hat\beta_0 + \hat\beta_1 x_i}}
+\end{eqnarray*}
+for some $i \in \{1,\dots,n\}$. Substituting the values $\hat\beta_0=-1.24$, $\hat\beta_1=0.54$, $x_i=3$, $N_i=50$, $\hat\mu_i$ is computed to be
+\Sexpr{round(mu.i.hat,2)}.
+
+%Question 3
+\newpage
+3.\\
+(a)
+%original fit
+\begin{small}
+<<echo=FALSE,output=FALSE>>=
+count <- c(176, 3, 293, 4, 197, 17, 23, 2)
+cl <- c(rep("A", 4), rep("B", 4))
+ca <- rep(c("L", "L", "H", "H"), 2)
+su <- rep(c("S", "D"), 4)
+clinic <- factor(cl)
+care <- factor(ca, levels=c("L","H"))
+surv <- factor(su, levels=c("S","D"))
+health <- data.frame(clinic, care, surv, count)
+health
+health.glm <- glm(count ~ clinic + care + surv + clinic:care +
+clinic:surv, family = poisson, data = health)
+@
+%model summary and new code
+
+<<>>=
+summary(health.glm)
+clsum <- tapply(count, list(clinic, surv), sum)
+clsum
+fits <- fitted(health.glm)
+fitclsum <- tapply(fits, list(clinic, surv), sum)
+fitclsum
+@
+\end{small}
+\texttt{count}, the number of survivals/deaths, is summed over the margins of \texttt{care} at each pairwise level of \texttt{clinic} and \texttt{surv}. The effect of this is to remove distinct \texttt{count}s for the different levels of \texttt{care}. The resulting variable is a 2-by-2 matrix \texttt{clsum}, a 2-way table of \texttt{count}s for \texttt{surv} against \texttt{clinic}. The same computation is carried out on the fitted values from the model and stored in \texttt{fitclsum}.\\
+The two outputs are identical because of the model fitted to the data. The model corresponds to a 3-way design with 3 responses \texttt{care}, \texttt{surv} and \texttt{clinic} and assumes conditional independence between \texttt{care} and \texttt{surv} given \texttt{clinic}. This can equally be seen as the 3-way design where \texttt{clinic} and \texttt{care} are both explanatory variables with fixed margins, but where \texttt{count} is assumed to have the same distribution for all levels of \texttt{clinic}, regardless of the level of \texttt{care}. The fitted model therefore preserves the total observed \texttt{count}s at each pairwise level of the two explanatory variables \texttt{clinic} and \texttt{care}.
+
+(b) The probability of survival and death for each clinic are calculated and stored in the matrix \texttt{probs}. The odds of survival are computed for each clinic, and stored in the vector \texttt{odds}. Finally the odds ratio is calculated and stored in \texttt{or}.
+<<print=TRUE>>=
+probs <- fitclsum/matrix(rep(apply(fitclsum,1,sum),2),2);
+odds <- probs[,"S"]/probs[,"D"];
+or <- odds["A"]/odds["B"];
+@
+The probability of survival in clinic A is
+\Sexpr{round(100*probs["A","S"],1)}\% and in clinic B is
+\Sexpr{round(100*probs["B","S"],1)}\%. A child is
+\Sexpr{ceil(odds["A"])} times more likely to survive than die in clinic A, whereas only about
+\Sexpr{ceil(odds["B"])} times as likely to survive as die in clinic B. The corresponding odds ratio of
+\Sexpr{round(or,1)} is much larger than 1 which suggests this difference may be significant and worth investigating further.
+
+(c)
+\begin{small}
+<<echo=FALSE,output=FALSE>>=
+surv <- c(176, 293, 197, 23)
+died <- c(3, 4, 17, 2)
+cl <- c("A", "A", "B", "B")
+ca <- rep(c("L", "H"), 2)
+total <- surv + died
+clinic <- factor(cl, levels=c("B","A"))
+care <- factor(ca, levels=c("L","H"))
+prop <- surv/total
+HLR <- data.frame(surv, died, prop, total, clinic, care)
+HLR
+health.glm <- glm(prop ~ clinic, family = binomial, weights = total, data=HLR)
+@
+<<>>=
+summary(health.glm)
+@
+\end{small}
+
+The proportion of survivals are modelled via logistic regression using the logit link function \eqref{eq:logitlink} with \texttt{clinic} as the sole explanatory variable. The model fits as seen from the small residual deviance which is far smaller than the number of residual degrees of freedom. The odds ratio can be recovered from the fitted values of the model which correspond to the probability of survival for each clinic.
+<<keep.source=TRUE,print=TRUE>>=
+
+prob.logit<-predict(health.glm,data.frame(clinic=c("A","B")),type="response")
+or.logit<-(prob.logit[1]/(1-prob.logit[1]))/
+          (prob.logit[2]/(1-prob.logit[2]));
+@
+The fitted values match exactly the probabilities computed earlier. This subsequently produces the same odds ratio.
+
+%Question 4
+\newpage
+4.\\
+(a) An appropriate statistic for testing $H_0$ ($p$-$q$ redundant parameters) against $H_1$ (at least one of those parameters not redundant) is the generalized likelihood ratio
+\begin{equation*}
+\Lambda_0 = \frac{\hat{L}_R}{L_S}/\frac{\hat{L}_F}{L_S}
+\end{equation*}
+where $\hat{L}_R$ and $\hat{L}_F$ are the maximised likelihoods of the GLMs fitted to $q$ and $p$ parameters respectively and $L_S$ is the likelihood of the saturated ($n$-parameter) model. If $H_0$ is true, we would expect $\Lambda_0$ to be close to 1. The following result holds asymptotically under $H_0$
+\begin{equation*}
+W = -2\log\Lambda_0 \sim \chi^2_{p-q}
+\end{equation*}
+The calculation of $W$ can be simplified. For GLMs with the restriction $a_i(\phi)=\phi/w_i$ for $i\in\{1,\dots,n\}$, $W$ can be written as
+\begin{equation}\label{eq:Wdev}
+W=\frac{D_R-D_F}{\phi}
+\end{equation}
+which is the difference between the scaled deviances for the $q$ and $p$ parameter models. The scaled deviance $D/\phi$ for a model is a measure of discrepency with respect to the saturated model, where $D$ is defined as
+\begin{equation}\label{eq:deviance}
+D = 2\sum_{i=1}^{n}w_i[y_i(\tilde\theta_i-\hat\theta_i)-(b(\tilde\theta_i)-b(\hat\theta_i))]
+\end{equation}
+where the $\tilde\theta_i$ and $\hat\theta_i$, $i\in\{1,\dots,n\}$ are the fitted canonical parameters for the saturated model and model in question, respectively.
+
+(i) When the dispersion parameter $\phi$ is known, W can be evaluated directly from \eqref{eq:Wdev} and \eqref{eq:deviance} using the $n$ fitted values of $\theta_i$ for each of the two $p$ and $q$ parameter models. $H_0$ can then be rejected in favour of $H_1$ at the $100\times\alpha\%$ level of significance if the evaluated $W$ exceeds $\chi^2_{p-q,(1-\alpha)}$.
+
+(ii) When the dispersion parameter $\phi$ is unknown a modified statistic can be used to test $H_0$. We refer to the results
+\begin{eqnarray}
+\label{eq:devstat}
+\frac{D_F}{\phi} & \sim & \chi^2_{n-p}\\
+\nonumber
+E[\phi] & = & \frac{D_F}{n-p}
+\end{eqnarray}
+about the scaled deviance of the $p$ parameter model which also holds under $H_0$ and the unconditional expectation of $\phi$. Now the modified statistic is constructed as
+\begin{equation}\label{eq:devstat2}
+W_1 = \frac{(D_R-D_F)/(p-q)}{D_F/(n-p)}
+\end{equation}
+which under $H_0$ is distributed according to
+\begin{equation*}
+W_1 \sim F_{p-q,n-p}
+\end{equation*}
+$W_1$ can be evaluated via \eqref{eq:devstat2} and \eqref{eq:deviance}. Subsequent comparison with $F_{p-q,n-p,(1-\alpha)}$ can be used to reject $H_0$ at the $100\times\alpha\%$ level (if the evaluated statistic exceeds this quantile).
+
+(b)
+(i) In model A the linear predictor for the expected \texttt{clottime} is a function only of \texttt{lconc} and not \texttt{lot}, so that no inference can be made about the effect of different \texttt{lot}s on \texttt{clottime}.\\
+In model B the linear predictor contains both \texttt{lconc} and \texttt{lot}, so that inference can be made about the effects of both variables on \texttt{clottime}.\\
+In addition to both these variables, model C also contains their interaction, so that further inference can be made concerning a differing \texttt{lconc} effect across the two \texttt{lot}s.\\
+
+(ii) The residual (scaled) deviance of a GLM is a useful metric for model assessment, given in \eqref{eq:deviance}. As stated earlier the deviance of a model is a measure of the discrepency between the model and the saturated model. If the deviance of a model is `large' then it can be discredited as not providing an adequate fit to the data. As the number of parameters $p$ specified in a model increases therefore the deviance will tend to decrease which needs to be accounted for in the test. Specifically if the linear coefficients $\beta_{p+1},\dots,\beta_{n}$ in the saturated model all equal 0, distributional result \eqref{eq:devstat} holds for $D_F$, the deviance of the $p$-parameter model.\\
+The scaled deviances for the three models A, B and C are computed and stored in the vector \texttt{scd}. These values are compared with the appropriate $\chi^2$ distributions to test the models for adequacy.
+<<keep.source=TRUE,print=TRUE>>==
+scd=c(A=1.01826/0.062194,
+      B=0.3004207/0.0195687,
+      C=0.0294015/0.0021297);
+pval=c(1-pchisq(scd["A"],16),
+       1-pchisq(scd["B"],15),
+       1-pchisq(scd["C"],14));
+@
+None of the models can be rejected for inadequacy on the basis of their residual deviances alone, although it may be noted that model C has the highest p-value. In the interest of parsimony it is not clear whether models B or C should be chosen over A. The model comparison procedure described in section (a)(ii) is invoked to test whether the additional parameters have a significant effect on the response variable in the presence of earlier parameters. The statistic $W_1$ (see \eqref{eq:devstat2}) is computed pairwise for models A and B, and B and C, and stored in the vector \texttt{comp}.
+<<keep.source=TRUE,print=TRUE>>=
+comp=c(AB=(1.01826-0.3004207)/0.0195687,
+       BC=(0.3004207-0.0294015)/0.0021297);
+pval=c(1-pf(comp["AB"],1,15),
+       1-pf(comp["BC"],1,14));
+@
+Comparing these values against the appropriate $F$ distributions it is clear that each new parameter is significant in the presence of earlier parameters. Model C can now be endorsed as the most suitable one.
+
+(iii) The large and significant value of the statistic $W_{1,BC}$ in section (b)(ii) clearly suggests that the relationship between normal plasma concentration and clotting time {\bf did} differ between the two lots of thromboplastin. Equivalently the interaction variable \texttt{lconc:lot} in model C is significant in the presence of the two individual variables \texttt{lconc} and \texttt{lot}. For lot 2 the estimated \texttt{lconc} coefficient is higher than for lot 1, by about 0.008.
+
+(iv)
+<<keep.source=TRUE>>=
+B = matrix(c(-0.01655438,-0.01655438-0.007354088,
+             0.01534311,0.01534311+0.008256099),
+             nrow=2);
+rownames(B)=c(1,2);
+colnames(B)=c("B0","B1");
+B;
+@
+Model C is fitted using gamma regression and the reciprocal link function. The fitted equations for the mean clotting times $\mu_1$ and $\mu_2$ for lots 1 and 2 respectively are
+\begin{eqnarray*}
+\hat\mu_1 = (-0.0166 + 0.0153\log c)^{-1}\\
+\hat\mu_2 = (-0.0239 + 0.0236\log c)^{-1}
+\end{eqnarray*}
+where $c$ is the normal plasma concentration (as a percentage). These equations are plotted in Figure \ref{fig:fitclot}.
+
+\begin{figure}[h]
+\begin{center}
+<<echo=FALSE,output=FALSE,fig=TRUE>>=
+c=5:100;
+fit=data.frame(c,
+               lot1=1/(B[1,1]+B[1,2]*log(c)),
+               lot2=1/(B[2,1]+B[2,2]*log(c)));
+               
+op=par(mar=c(4,4,3,2));
+plot(fit$lot1,type="l",
+     xlim=c(0,100),ylim=c(min(fit),max(fit)),
+     xlab="conc",ylab="fitted clottime")
+lines(fit$lot2,lty=2);
+legend("topright",c("lot 1","lot 2"),lty=c(1,2));
+par(op);
+@
+\caption{Fitted model equations for clotting time against normal plasma concentration from model C, for the two lots of thromboplastin}
+\label{fig:fitclot}
+\end{center}
+\end{figure}
+
+<<echo=FALSE,output=FALSE>>=
+predicted=1/(B[2,1]+B[2,2]*log(50));
+@
+The clotting time in seconds for a normal plasma concentration of 50\%, using thromboplastin lot 2 can be predicted using the equation for $\hat\mu_2$:
+\begin{eqnarray*}
+\hat\mu_2 & = & (-0.0239 + 0.0236\log 50)^{-1}\\
+          & = &
+\Sexpr{round(predicted,2)} \text{ seconds}
+\end{eqnarray*}
+(v) The exponential distribution is equivalent to the gamma distribution with the (natural exponential) dispersion parameter set equal to 1. As the dispersion parameter increases beyond 1 the p.d.f. of the gamma takes on more of a bell shape. For values below 1 the p.d.f. approaches infinity very sharply at the asymptote $x=0$. The endorsed model (C) has an estimated dispersion parameter $\hat\phi=0.00213$. A comparison of the two p.d.f.s with the same mean is given in Figure \ref{fig:gammaexp} which shows indicates their quantiles are quite different. If an exponential regression was carried out, it would therefore lose some of the flexibility of the gamma regression and not fit the data as well. On the other hand the fitted $\hat\phi$ may be close enough to (and below rather than above) 1 to consider a trial exponential regression on the grounds of parsimony. The residual dispersion could then be inspected to check whether the resulting model provides an adequate fit.
+\begin{figure}
+\begin{center}
+<<output=FALSE,echo=FALSE,fig=TRUE>>=
+x=seq(0.1,20,0.1);
+shape.gamma=0.021297
+scale.gamma=10/shape.gamma;
+dist.comp=data.frame(pdf.gamma=dgamma(x,shape=shape.gamma,rate=1/scale.gamma),
+                     pdf.exp=dexp(x,rate=1/scale.gamma/shape.gamma));
+#p=seq(0,1,0.01);
+#q.comp=data.frame(q.gamma=qgamma(p,shape=shape.gamma,rate=1/scale.gamma),
+#                  q.exp=qexp(p,rate=1/scale.gamma/shape.gamma));
+#plot(q.comp$q.gamma,q.comp$q.exp,ylim=c(0,40),xlim=c(0,40));
+plot(x,dist.comp$pdf.gamma,type="l",
+     xlim=c(0,20),ylim=c(0,max(dist.comp)),ylab="p.d.f.");
+lines(x,dist.comp$pdf.exp,lty=2);
+abline(0,0,lty=3); abline(v=0,lty=3);
+legend("topright",c("gamma","exponential"),lty=c(1,2));
+@
+\caption{p.d.f.s for the gamma and exponential distribution each with the expected value 10. The dispersion parameter of the gamma distribution is set to 0.0021297.}
+\label{fig:gammaexp}
+\end{center}
+\end{figure}
+
+\end{document}
+

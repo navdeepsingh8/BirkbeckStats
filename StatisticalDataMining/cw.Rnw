@@ -1,0 +1,60 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage{fancyhdr}
+\usepackage[left=2.5cm,top=3.5cm,headheight=2cm,right=3cm,bottom=3cm]{geometry}
+\usepackage{bm}
+\usepackage{amsmath,amssymb}
+
+\pagestyle{fancyplain}
+\author{Navdeep Singh Daheley}
+\title{Statistical Data Mining\\Coursework}
+\lhead[\thepage]{Navdeep Singh Daheley\\MSc Applied Statistics}
+\rhead[\thepage]{Statistical Data Mining Coursework - \today}
+\setlength{\parskip}{0.3cm}
+\setlength{\parindent}{0cm}
+
+\SweaveOpts{keep.source=TRUE}
+<<devoff,echo=FALSE,results=hide,eval=FALSE>>=
+dev.off();
+path="c:\\library\\courses\\birkbeck msc as\\statistical data mining\\";
+@
+
+\begin{document}
+\setkeys{Gin}{width=0.6\textwidth}
+\maketitle
+\tableofcontents
+
+\newpage
+\section{Initial exploration, summary statistics, plots}
+
+Approach of not looking at test data during model building (free from
+data snooping bias).
+
+Steps
+\begin{enumerate}
+  \item Unconditional class probabilities in the training data
+  \item Summary statistics of the explanatory variables
+  \item Univariate densities: with and without class labels, and
+    comments about distributional shapes, outliers and separation
+  \item Scatter plot matrices: with and without class labels and
+    comments about separation
+  \item Correlation matrix tables (Pearson and Spearman) to illustrate
+    numerical linear dependency measures
+  \item PCA with/without outliers: scree plot and scatter plot matrix in PC-space
+  \item Classical scaling using Spearman rank correlations to account
+    for non-linearities (ordinal scaling?)
+  \item (if have time) Sammon mapping as another non-linear dimensional scaling procedure
+\end{enumerate}
+
+Consider talking about Bayes risk here - definition, and what it is
+for the training set. A note about generalization to the test set.
+
+\newpage
+\section{Linear and quadratic discriminant analysis}
+
+Note the model equation and main features (from notes, and look up
+link with canonical variates analysis).\\
+
+
+\end{document}
+

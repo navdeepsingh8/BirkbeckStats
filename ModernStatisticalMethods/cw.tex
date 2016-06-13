@@ -1,0 +1,698 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{fancyhdr}
+\usepackage[left=2.5cm,top=3.5cm,headheight=2cm,right=3cm,bottom=3cm]{geometry}
+\usepackage{bm}
+\usepackage{amsmath,amssymb}
+\pagestyle{fancyplain}
+\lhead[\thepage]{Navdeep Daheley\\MSc Applied Statistics}
+\rhead[\thepage]{Modern Statistical Methods - Coursework - \today}
+\setlength{\parskip}{0.3cm}
+\setlength{\parindent}{0cm}
+
+
+
+\usepackage{Sweave}
+\begin{document}
+\setkeys{Gin}{width=0.6\textwidth}
+{\bf Please note that some of the referenced figures are at the back of the document.}
+
+1. (a) The cumulative distribution function (cdf) $F(x)$ corresponding to the
+Weibull random variable $X$ parameterised by $\rho > 0$ and $\kappa > 0$ is
+\begin{equation*}
+  F(x) = 1 - e^{-(\rho x)^\kappa}
+\end{equation*}
+for $x \ge 0$. Since $F(X)$ is uniformly distributed on $[0,1]$ and it
+is an increasing function on this interval, we have the result that
+for any $U \sim U(0,1)$, $F^{-1}(U)$ has cdf $F$. This result is the
+basis for simulation of $X$ via the  inversion method. It is
+sufficient to evaluate $F^{-1}(u)$:
+\begin{eqnarray*}
+  u & = & 1 - e^{-(\rho x)^\kappa} \\
+  e^{-(\rho x)^\kappa} & = & 1-u\\
+%  e^{-(\rho x)^\kappa} & = & U\\
+  (\rho x)^\kappa & = & -\ln(1-u) \\
+  x & = & \frac{1}{\rho} \{ -ln(1-u) \} ^{\frac{1}{\kappa}}\\
+  \end{eqnarray*}
+If $u\sim U(0,1)$ then so is $1-u$. To get the result we replace this with $U$ and $x$ by
+$X$ which is a random variable with cdf $F(x)$:
+\begin{equation*}
+  X = \frac{1}{\rho} \{ -ln(U) \} ^{\frac{1}{\kappa}}
+  \end{equation*}
+
+1. (b) A brief summary of the theory behind the acceptance-rejection
+(A-R) method:\\
+Assume $f(x)$ and $h(x)$ are PDFs such that (the envelope)
+$g(x)=kh(x)\ge f(x)$ $\forall x$, $k$ is typically the smallest
+positive constant which makes this true
+and $h(x)$ has support $[c,d]$. Then for random variables
+$X$ and $Y$ if  $Y|(X=x) \sim U(0,g(x))$, $X|(Y\le f(X))$ has PDF
+$f(x)$. In the A-R method, $f(x)$ is the PDF we wish to simulate from
+and $h(x)$  is a PDF we can simulate from directly.\\
+Here $f$ is given by
+\begin{equation*}
+  f(x) = \frac{1+\alpha}{\alpha(1+x)^2}
+\end{equation*}
+for $0\le x\le\alpha$ and $\alpha > 0$ and we are instructed to use
+the uniform distribution to construct the envelope, i.e.
+\begin{equation*}
+  h(x) = \frac{1}{\alpha}
+\end{equation*}
+for $0\le x\le\alpha$. Furthermore we set $k$ to be the smallest
+number that ensures $g(x)\ge f(x)$ for $0\le x\le\alpha$. Since $f(x)$
+is strictly decreasing in $x$ its maximum value is attained at $x=0$ where
+$f(0)=\alpha^{-1}(1+\alpha)$. Therefore we set $k=(1+\alpha)$ giving
+the envelope
+\begin{equation*}
+  g(x) = \frac{1+\alpha}{\alpha}
+\end{equation*}
+The outline for simulating a sequence $\{x_i\}$ of independent observations from
+$f(x)$ is as follows:
+\begin{enumerate}
+  \item Simulate a candidate observation $x_i \sim U(0,\alpha)$
+    i.e. from $h(x)$
+  \item Simulate $y_i \sim U(0,\alpha^{-1}(1+\alpha))$ i.e. $U(0,g(x_i))$
+
+  \item If $y_i\le f(x_i)$ accept $x_i$ otherwise reject it
+  \item Repeat the steps above
+\end{enumerate}
+
+The number of pseudorandom numbers generated per simulated observation
+can be evaluated by considering the probability $p$ of accepting a
+candidate observation:
+\begin{eqnarray*}
+ p & = &  \frac{\int_0^\alpha \! f(x) \, dx}{\int_0^\alpha \! g(x) \, dx}\\
+   & = &  \frac{\alpha^{-1}(1+\alpha) \int_0^\alpha \! (1+x)^{-2} \, dx}
+               {\alpha^{-1}(1+\alpha)\int_0^\alpha \!  \, dx} \\
+   & = &  \frac{1}{\alpha} \int_0^\alpha \! (1+x)^{-2} \, dx\\
+   & = &  \frac{1}{\alpha}\left[-(1+\alpha)^{-1} \right]^\alpha_0 \\
+   & = &  \frac{1}{1+\alpha}
+\end{eqnarray*}
+Therefore the expected number of candidate observations $x_i$ generated per
+accepted observation is $(1+\alpha)$, and since for each $x_i$ a
+$y_i$ is also generated, on average $2(1+\alpha)$ pseudorandom numbers
+are generated per observation simulated. Clearly, as $\alpha \rightarrow
+0$, $f(x)$ tends to the envelope in area, reducing the number of
+pseudorandom numbers required to simulate from it.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics{cw-002}
+\caption{$f(x)$ (curved) and $g(x)$ (horizontal) for $\alpha=$ 0.2,0.5
+and 0.8}
+\end{center}
+\end{figure}
+
+
+\pagebreak
+2. (a) The data were input into R to obtain the data frame \texttt{dugong}, and
+plotted.
+\begin{Schunk}
+\begin{Sinput}
+> dugong=read.table(file(paste(path,"q2.txt",sep="")),header=T);
+> plot(dugong$age,dugong$length);
+\end{Sinput}
+\end{Schunk}
+\begin{figure}[h]
+  \begin{center}
+\includegraphics{cw-004}
+\end{center}
+\end{figure}
+The model is a nonlinear regression model because of the presence of
+both $\beta$ and $\gamma$ in the $\beta\gamma^{x_i}$ term. For
+strictly non-negative $x_i$ as is the case here, $\mu_i$ is
+bounded above by $\alpha$. This aspect of the model is consistent with
+the length data, which are bounded above at around 3 metres. Maximum adult dugong
+length is an interpretation of $\alpha$. Also, according to the model
+$\mu_i$ increases with $x_i$ and is concave, a feature also exhibited in the
+data. The extent of the concavity depends on $\gamma$, which can
+therefore  be interpreted as a measure of how sensitive growth rate is
+to age. $\gamma$ close to 0 corresponds to a much higher growth rate
+in youth than in old age. $\gamma$ close to 1 corresponds to a more
+stable growth rate through life. Finally $\alpha-\beta$ is the
+intercept of the model, the value of $\mu_i$ when $x_i=0$. This can be
+interpreted as the size of a newborn dugong, and given $\alpha$ is
+governed by $\beta$.
+
+2. (b)
+\begin{Schunk}
+\begin{Sinput}
+> dugong.fit <- nls(length ~ alpha - beta * gamma^age, dugong,
++                   start=list(alpha=2.7,beta=1.0,gamma=0.8));
+> dugong.fit;
+\end{Sinput}
+\begin{Soutput}
+Nonlinear regression model
+  model:  length ~ alpha - beta * gamma^age 
+   data:  dugong 
+ alpha   beta  gamma 
+2.6581 0.9635 0.8715 
+ residual sum-of-squares: 0.2177
+
+Number of iterations to convergence: 6 
+Achieved convergence tolerance: 3.291e-06 
+\end{Soutput}
+\begin{Sinput}
+> dugong.fit1 <- nls(length ~ alpha - beta * gamma^age, dugong,
++                    start=list(alpha=2.5,beta=0.8,gamma=0.6));
+> dugong.fit1;
+\end{Sinput}
+\begin{Soutput}
+Nonlinear regression model
+  model:  length ~ alpha - beta * gamma^age 
+   data:  dugong 
+ alpha   beta  gamma 
+2.6581 0.9635 0.8715 
+ residual sum-of-squares: 0.2177
+
+Number of iterations to convergence: 7 
+Achieved convergence tolerance: 9.317e-06 
+\end{Soutput}
+\begin{Sinput}
+> plot(dugong$age, dugong$length);
+> lines(dugong$age, predict(dugong.fit1));
+\end{Sinput}
+\end{Schunk}
+\begin{figure}[h]
+  \begin{center}
+\includegraphics{cw-006}
+\end{center}
+\end{figure}
+The output of the code shows the nonlinear least-square estimates of
+$\alpha$,$\beta$ and $\gamma$ starting from two different sets of
+starting values. The starting values appear not to be too critical as the
+same estimates are arrived at in each case. The plot shows the fitted
+values $\hat\mu_i$ against $x_i$, shown as a line (with linear
+interpolation between data points). The sum of squared residuals
+$(y_i-\hat\mu_i)^2$ has been minimised (via the Gauss-Newton numerical
+method) by these parameter estimates. The model appears to
+fit well with no (visually) discernable pattern in the
+residuals. Further analysis of the residuals could be carried out such
+as plots and tests of randomness. We also calculate the ratio of
+the model sum-of-squares to the total-sum-of-squares.
+\begin{Schunk}
+\begin{Sinput}
+> total_sum_sq <- (nrow(dugong)-1)*var(dugong$length);
+> 1-deviance(dugong.fit1)/total_sum_sq;
+\end{Sinput}
+\begin{Soutput}
+[1] 0.8889847
+\end{Soutput}
+\end{Schunk}
+$89\%$ of the variance in dugong length is accounted for by the model
+which is a good fit.
+
+($\hat\alpha=$) 2.66 metres is the estimated upper bound for dugong
+length. ($\hat\alpha$-$\hat\beta$=) 1.69 metres is the estimated
+lower bound for dugong length. Also $\hat\gamma=$0.87 corresponds to a
+growth rate that is highest before the age of 10, subsequently falling to a
+visually lower rate. Estimates of growth rates could be obtained by
+linearising parts of the fitted response function and calculating its
+gradient.
+
+To carry out classical inference about the precision of these parameter
+estimates we would need to make distributional assumptions about the
+residuals. Furthermore since the model is nonlinear, we cannot apply
+the machinery associated with OLS estimators here.
+
+2. (c) The following modified code was run in R, making use of the
+\texttt{boot} package.
+\begin{Schunk}
+\begin{Sinput}
+> library(boot)
+> set.seed(965) #Starting at seed 964 causes nls() in R to not converge
+> #A function which estimates the coefficients using nls() from data d
+> dugong.fit <- function(d) {
++     coef(nls(length ~ alpha - beta * gamma^age, d,
++           start=list(alpha=2.5,beta=0.8,gamma=0.6)));
++ }
+> #A wrapper function which calls the estimation function using data d,
+> #bootstrapped according to vector of indices i
+> row.fun <- function(d,i) {
++  dugong.fit(d[i,]);
++ }
+> #A call to boot() which carries out bootstrap estimation with 1000 resamples
+> dugong.boot <- boot(dugong,row.fun,R=1000,stype="i");
+\end{Sinput}
+\end{Schunk}
+
+\begin{Schunk}
+\begin{Soutput}
+ORDINARY NONPARAMETRIC BOOTSTRAP
+
+
+Call:
+boot(data = dugong, statistic = row.fun, R = 1000, stype = "i")
+
+
+Bootstrap Statistics :
+     original       bias    std. error
+t1* 2.6580766  0.010357532  0.08096630
+t2* 0.9635221  0.013616427  0.06619887
+t3* 0.8714584 -0.003533535  0.03511136
+\end{Soutput}
+\end{Schunk}
+
+\begin{figure}[h]
+  \begin{center}
+\includegraphics{cw-010}
+\includegraphics{cw-011}
+\includegraphics{cw-012}
+\caption{The output of the \texttt{plot} function applied to the
+  \texttt{dugong.boot} object for each of $\alpha$, $\beta$ and
+  $\gamma$ respectively. For each parameter there is a histogram
+  of the bootstrap distribution and a $QQ$-plot vs quantiles of the
+  standard normal.}
+\label{fig:plotboot}
+\end{center}
+\end{figure}
+
+Empirical bootstrap distributions for the model parameters $\alpha$, $\beta$ and
+$\gamma$ (\texttt{t1*},\texttt{t2*} and \texttt{t3*} in the output)
+have been computed in this analysis. The idea behind this is
+that for a random sample from a population, in the absence of any
+other knowledge of that population, the distribution in the sample is
+the best guide to the distribution in the population. The population
+distribution is approximated by resampling (with replacement) from the
+sample. More specifically, the non-linear least squares estimates for
+$\alpha$, $\beta$ and $\gamma$ have been calculated for 1000 samples
+of the bivariate (age,length) data. Each sample (of equal size to the
+original data set) has been obtained by sampling with replacement from
+the original data set. The bootstrap distribution for each parameter,
+an approximation to the population distribution, is based on these
+1000 resampled estimates.
+
+The bias and standard error of each of the parameter estimates have been
+estimated from the bootstrap resamples, the bias as follows, using the
+bias of $\hat\alpha$, $b(\alpha)=E[\hat\alpha]-\alpha$, as an example:
+\begin{equation*}
+  \hat{b}(\alpha)= \frac{1}{1000}\sum_{i=1}^{1000}\hat\alpha_i' - \hat\alpha  \\
+\end{equation*}
+where $\hat\alpha_i'$ is the estimate of $\alpha$ from the $i$th bootstrap
+resample and $\hat\alpha$ is the estimate from the original
+sample. The rationale for this is that the distribution of
+$(\hat\alpha_i'-\hat\alpha)$ mimics that of
+$\hat\alpha-\alpha$. The estimated bias for $\hat\alpha$ and
+$\hat\beta$, $\hat{b}(\alpha)$ and $\hat{b}(\beta)$ are
+positive suggesting $\alpha$ and $\beta$ may be slightly overestimated
+by $\hat\alpha$ and $\hat\beta$. The amounts in each case are small:
+the bias represents about 1.0 and 1.4cm
+respectively. $\hat{b}(\gamma)$ is in relation very small and negative.
+
+Applying the \texttt{plot} function to the \texttt{dugong.boot} object
+for each parameter gave the output in Fig \ref{fig:plotboot}. For each
+parameter there is a histogram of the bootstrap distribution and a
+$QQ$-plot vs quantiles of the standard normal. The distribution of
+$\hat\beta'$ is closest to normal whilst $\hat\alpha'$
+is positively skewed and $\hat\gamma'$ negatively skewed.
+
+Further R code was run to calculate the Percentile and Accelerated
+Bias-Corrected Percentile (BCa) confidence intervals for the three
+parameters. The \texttt{boot.ci} function was used to calculate these
+confidence intervals and the output rounded to two decimal places.
+\begin{Schunk}
+\begin{Sinput}
+> #A function which outputs Percentile and BCa confidence intervals for a
+> #specified parameter from the model
+> show.dugong.ci <- function(param.num) {
++     ci.param <- boot.ci(dugong.boot,conf=0.95,type=c("perc","bca"),index=param.num);
++     ci.out <- round(cbind(ci.param$perc[4:5],ci.param$bca[4:5]),2);
++     colnames(ci.out) <- c("Percentile","BCa");
++     rownames(ci.out) <- c("L","U");
++     ci.out;
++ }
+> #Calculate confidence intervals for each parameter
+> show.dugong.ci(1); #alpha
+\end{Sinput}
+\begin{Soutput}
+  Percentile  BCa
+L       2.52 2.52
+U       2.85 2.84
+\end{Soutput}
+\begin{Sinput}
+> show.dugong.ci(2); #beta
+\end{Sinput}
+\begin{Soutput}
+  Percentile  BCa
+L       0.85 0.80
+U       1.11 1.08
+\end{Soutput}
+\begin{Sinput}
+> show.dugong.ci(3); #gamma
+\end{Sinput}
+\begin{Soutput}
+  Percentile  BCa
+L       0.79 0.78
+U       0.92 0.92
+\end{Soutput}
+\end{Schunk}
+
+The BCa intervals are corrected for bias and skewness in the parameter
+estimates. The assumption underlying these intervals is that for some
+(unknown) monotonic increasing function $f$,
+\begin{equation*}
+  f(\hat\alpha) \sim N(f(\alpha)-z_0(1+af(\alpha)), 1+af(\alpha))
+\end{equation*}
+$z_0$ corresponds to the bias of $\hat\alpha$ and $a$ corresponds to
+its skewness. The Percentile and BCa confidence intervals for
+$\alpha$ and $\gamma$ are similar. For $\beta$ however the BCa
+interval is (0.8,1.08) compared to the Percentile interval of
+(0.85,1.11). This negative shift and stretch is probably due to the
+relatively larger positive estimated bias in $\hat\beta$ of 0.014.
+
+In conclusion, the 95\% confidence intervals for the three parameters
+are reasonably well behaved (and in summary about 0.3 units wide for
+$\alpha$ and $\beta$, 0.1 for $\gamma$), and in further analysis a
+similar confidence interval could be constructed for average length,
+$\mu_i$. This gives us some indication about the precision of the
+parameter estimates. Furthermore we have estimated levels of bias,
+which could be interpreted as being not significantly large.
+
+\newpage
+3. (a)
+\begin{Schunk}
+\begin{Sinput}
+> library(MASS)
+> cholA <- c(122, 233, 239, 291, 254, 312, 276, 250, 234, 246, 181, 197,
++            248, 268, 252, 224, 202, 329, 218, 325);
+> cholB <- c(252, 420, 226, 185, 175, 263, 242, 246, 153, 224, 183, 212,
++            137, 188, 202, 250, 194, 148, 213, 169);
+> summary(cholA);
+\end{Sinput}
+\begin{Soutput}
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  122.0   222.5   247.0   245.1   270.0   329.0 
+\end{Soutput}
+\begin{Sinput}
+> summary(cholB);
+\end{Sinput}
+\begin{Soutput}
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  137.0   181.0   207.0   214.1   243.0   420.0 
+\end{Soutput}
+\begin{Sinput}
+> chol.box <- boxplot(cholA,cholB,ylab="Cholesterol level",names=c("Type A","Type B"));
+> chol.box$stats[3,]
+\end{Sinput}
+\begin{Soutput}
+[1] 247 207
+\end{Soutput}
+\end{Schunk}
+\includegraphics{cw-014}
+
+A box plot of cholesterol levels has been produced for the two samples
+of men corresponding to type A and type B. It appears from this plot
+that type A men tend to have higher cholesterol levels than type
+B. The quartiles, whiskers and the median are all higher for type A
+than for type B men. The two medians are 247 and 207
+respectively. The type A sample has a larger range but the type B
+sample appears to have a larger inter-quartile range (IQR). There is an
+outlier in each sample, as defined by observations at least 1.5 times
+the IQR outside a quartile. For the type A sample this is a low
+cholesterol level (below 160) whereas for type B it is a high level
+(above 410).
+
+3. (b) A kernel density estimate $\hat{f}_h$ of a pdf $f$ is given by
+\begin{equation*}
+ \hat{f}_h(x) = \frac{1}{n}\sum_{i=1}^n\frac{1}{h}K\left(\frac{x-x_i}{h}\right)
+  \end{equation*}
+where $K$ is a smoothing kernel, and $h$ the smoothing window
+parameter or bandwidth. $K$ is usually chosen to be a pdf itself, and
+it turns out the exact choice of functional form does not affect
+$\hat{f}_h$ very much. A sensible choice is to use the standard
+Gaussian pdf. $h$ is typically chosen to minimise the mean integrated
+square error (MISE) criterion:
+\begin{eqnarray*}
+  \mbox{MISE} & = &
+   E\left[\int_{-\infty}^{\infty}\! [\hat{f}_h(x)-f(x)]^2 \, dx \right]\\
+              & = &
+   \int_{-\infty}^{\infty}\! \mbox{Var}\left(\hat{f}_h(x)\right)\, dx +
+   \int_{-\infty}^{\infty}\! \mbox{Bias}^2(x)\, dx\\
+\end{eqnarray*}
+Smaller $h$ reduces Bias$(x)$ whilst large $nh$ reduces
+Var$(\hat{f}_h(x))$. Using Taylor approximations to $f$, it can be
+shown that for a given sample size $n$, the more variable $f$ is, the
+smaller the optimal value of $h$ is. Furthermore, assuming that the
+smoothness of $f$ can be approximated by a Gaussian pdf
+$N(\mu,\sigma^2)$, it can be shown that the MISE is minimised by
+\begin{equation*}
+  h_{opt} = k\sigma n^{-1/5}
+\end{equation*}
+where $k$ is usually taken to be 1.06. $\sigma$ is estimated as the
+minimum of the usual standard deviation estimator $s$ and
+IQR/1.34. This choice of $h$ is known as the normal reference
+distribution (nrd) bandwidth.
+
+The following R function was written to compute and plot kernel density
+estimates of the cholesterol distribution in each of the behaviour
+groups. The Gaussian kernel was used (by default), and smoothing
+parameter set to nrd. The output is shown in Fig \ref{fig:kdehist}
+superimposed on top of histogram plots.
+
+\begin{Schunk}
+\begin{Sinput}
+> plot.kde <- function(d) {
++     kde <- density(d,bw="nrd");
++     truehist(d,nbins=6,xlim=c(min(kde$x),max(kde$x)),
++                        ylim=c(min(kde$y),max(kde$y)));
++     lines(kde$x,kde$y);
++ }
+\end{Sinput}
+\end{Schunk}
+
+\begin{figure}[h]
+  \begin{center}
+\includegraphics{cw-016}
+\includegraphics{cw-017}
+\caption{Histogram plots and kernel density estimates of the
+  cholesterol distribution in each of the behaviour groups, computed
+  using the Gaussian kernel and normal reference distribution
+  bandwidth in the \texttt{plot.kde} function.}
+\label{fig:kdehist}
+\end{center}
+\end{figure}
+
+The following code was written to plot the kernel density estimates on
+the same chart for comparison.
+\begin{Schunk}
+\begin{Sinput}
+> kde.A <- density(cholA,bw="nrd");
+> kde.B <- density(cholB,bw="nrd");
+> xlim=c(min(kde.A$x,kde.B$x),max(kde.A$x,kde.B$x));
+> ylim=c(min(kde.A$y,kde.B$y),max(kde.A$y,kde.B$y));
+> plot(kde.A$x,kde.A$y,type="l",xlim=xlim,ylim=ylim,
++      ylab="probability density",xlab="Cholesterol (mg per 100ml)");
+> lines(kde.B$x,kde.B$y,lty=2);
+> abline(h=0);
+> legend("topright",c("A","B"),lty=1:2);
+\end{Sinput}
+\end{Schunk}
+\includegraphics{cw-018}
+
+The kernel density estimates are far smoother than the histogram
+plots, particularly for group B, which looks close to Gaussian save
+for the outlier. When plotted side by side, there is a difference in
+the modal cholesterol level for the two groups. As seen in the box
+plot, cholesterol levels for group B appear to be lower than for group
+A. The presence of outliers is likely to influence a test based on
+sample means. In particular the location of the outliers would bring
+sample means closer together. This effect would be less pronounced on
+sample medians.
+
+3. (c) An {\em exact} randomization test is a non-parametric hypothesis test
+for the equivalence of treatment groups. The null hypothesis posits
+that the treatment group distributions are identical, yet they need
+not belong to any specific family. In this test a reference distribution
+is obtained by calculating all possible values of the test statistic
+under rearrangements of the treatment labels for data points in the
+samples. The significance of the observed test statistic is then
+calculated with reference to this distribution, as the probability of
+incorrectly rejecting the null hypothesis.
+
+It may not be computationally feasibly to carry out every permutation of the
+treatment group labels. For instance in the two sample case with equal sample
+sizes $n$, there are $\binom{2n}{n}$ permutations. Where an exact
+test is not feasible, an {\em approximate} randomization test can be
+used. This is a Monte Carlo test where  a (relatively) small sample
+from all permutations of the labels is generated randomly to compute the
+reference distribution.
+
+In the case of the the behaviour-cholesterol data set, an exact test
+of $H_0$ to obtain a $p$-value would require $\binom{40}{20}$
+permutations which is of the order $10^{11}$. An approximate test can
+be carried out with the following steps:
+
+\begin{enumerate}
+  \item Evaluate the statistic $\hat\theta_0$ for the two observed samples
+  \item Generate 999 further {\em random} permutations of 20 type A
+    and 20 type B labels across the 40 observations, for each permutation
+    evaluating and recording $\hat\theta_i$
+  \item Since this is a one-way test of $\theta=0$ vs $\theta > 0$,
+    $p$ can be estimated as the proportion of all evaluated $\hat\theta$s
+    (including $\hat\theta_0$) greater than or equal to $\hat\theta_0$
+\end{enumerate}
+
+This test is carried out in the following R code:
+\begin{Schunk}
+\begin{Sinput}
+> ts <- median(cholA)-median(cholB); #calculate observed statistic
+> ts;
+\end{Sinput}
+\begin{Soutput}
+[1] 40
+\end{Soutput}
+\begin{Sinput}
+> #set up permutations
+> chol <- c(cholA,cholB); #augment samples into one
+> n <- length(chol);      #get size of total data
+> B <- 999;               #choose number of permutations
+> t <- rep(0,B);          #prepare a vector for the statistics
+> set.seed(3012);         #set PRNG seed
+> #randomly permute the data set B times and record the statistic each time
+> for (i in 1:B) {
++  chol.permute <- chol[sample(n)];
++  t[i] <- median(chol.permute[1:(n/2)])- median(chol.permute[(n/2+1):n]);
++ }
+> pval <- sum(ts<=c(t,ts))/(B+1); #estimate p-value for the test statistic
+> pval;
+\end{Sinput}
+\begin{Soutput}
+[1] 0.018
+\end{Soutput}
+\end{Schunk}
+
+Clearly $\hat\theta_0>0$ as was observed in the box plots in part
+(a). In particular, $\hat\theta_0=40$. The approximate randomization
+test estimates the $p$-value of the statistic as 0.018, making it
+significant at the $5\%$ but not the $1\%$ level. Therefore we can
+conclude from this sample that, at the $5\%$ significance level,
+cholesterol level {\em is} related to behaviour type in heavy
+middle-aged men: it is higher for men with type A (urgent and
+aggressive) behaviour than for men with type B (relaxed, non
+competitive) behaviour.
+
+\newpage
+4. (a) The conditional distributions $X|N=n$ and $N|X=x$ can be found
+by considering the conditioned variable as a constant in the bivariate
+joint distribution. This is done for $X|(N=n)$ and $N|(X=x)$ for $x=0$
+and $x>0$ separately:
+\begin{eqnarray*}
+  f(x|N=n) & \propto & \frac{p^x(1-p)^{n-x}}{(n-x)!x!}\\
+  X|(N=n) & \sim & Bin(n,p)\\
+  \\
+  f(n|X=0) & \propto & \frac{(1-p)^n\lambda^n}{n!}\\
+  N|(X=0) & \sim & Poi\left((1-p)\lambda\right)\\
+  \\
+  f(n|X=x) & \propto & \frac{(1-p)^{n-x}\lambda^n}{(n-x)!x!}\\
+           & \propto & \frac{\left[(1-p)\lambda\right]^{n-x}}{(n-x)!}\\
+  N|(X=x) & = & W + x\\
+  \mbox{where } W & \sim & Poi\left((1-p)\lambda\right)\\
+  \mbox{and } x & > & 0
+\end{eqnarray*}
+A caveat to the Poisson distribution found for $N|(X=0)$ is that $n=0$
+is part of its support, however the joint pdf is valid for positive $n$
+only.
+
+4. (b) The code uses the Gibbs sampling Markov Chain Monte Carlo
+algorithm to generate an acyclic, irreducible Markov chain
+$\{x_i,n_i\}_{i\ge 1}$ with invariant distribution $f(x,n)$. By the
+ergodic asymptotic result, expectations estimated from this chain
+converge `in time' to the invariant distribution, including estimates
+of the probability mass function (pmf) itself. The Gibbs
+sampling algorithm works by sampling from the conditional
+distributions $X|N$ and $N|X$ at each step to generate the chain
+variable-by-variable, step-by-step. According to the
+Metropolis-Hastings acceptance criterion, every sampled observation is
+automatically accepted.
+
+The code generates a chain of length 5000, with distributional
+parameters $p=0.4$ and $\lambda=20$. \texttt{x1} and \texttt{n1} are
+vectors set up to store $\{x_i\}_{i\ge 1}$ and $\{n_i\}_{i\ge
+  1}$. These can be used to estimate expectations from the joint or
+marginal distributions of $X$ and $Y$ (including their pmfs). The
+algorithm implemented is as follows, including a
+small modification to ensure the correct support of $f(x,n)$.
+
+\begin{enumerate}
+  \item Generate $x_i$ from $X|(N=n_{i-1})$, using $n_0=60$ on the first
+    iteration to generate $x_1$, and store it in \texttt{x1[$i$]}:\\
+    (*) \texttt{rbinom(1,n,p)}
+  \item Generate a candidate $n_i$ from $N|(X=x_i)$, accepting it if it
+  is greater than 0, and store it in \texttt{n1[$i$]} (this ensures
+  the correct support of $f(x,n)$):\\
+  (**)  \texttt{rpois(1,(1-p)*lambda)+x}
+  \item Repeat for $i=$ 1 to 5000
+\end{enumerate}
+
+4. (c) The completed Gibbs sampling code was run in R, followed by the further code:
+
+\begin{Schunk}
+\begin{Sinput}
+> #Plot time series and histogram plots of x1 and n1
+> plot(x1,type="l",ylab="x",xlab="");
+> plot(n1,type="l",ylab="n",xlab="");
+> truehist(x1,xlab="x",nbin=20);
+> truehist(n1,xlab="n",nbin=20);
+> #Remove burn-in periods
+> x2 <- x1[501:5000];
+> n2 <- n1[501:5000];
+> #Calculate summary statistics
+> c(mean(x2),var(x2));
+\end{Sinput}
+\begin{Soutput}
+[1] 8.032222 7.818699
+\end{Soutput}
+\begin{Sinput}
+> c(mean(n2),var(n2));
+\end{Sinput}
+\begin{Soutput}
+[1] 20.04022 19.57229
+\end{Soutput}
+\end{Schunk}
+
+\begin{figure}[h]
+\begin{centering}
+\includegraphics{cw-022}
+\includegraphics{cw-023}
+\includegraphics{cw-024}
+\caption{Time series and histogram plots of \texttt{x1} and
+  \texttt{n1}. Theoretical probability mass functions obtained for $X$
+and $N$ are overlaid on the histogram plots.}
+\label{fig:Gibbs}
+\end{centering}
+\end{figure}
+The time series and histogram plots are shown in Fig
+\ref{fig:Gibbs}. A cursory glance at the time series plots indicates
+stationarity of the generated chains, allowing for a burn in period of
+perhaps 500 iterations, which is a desirable result. The
+histograms, which are approximations to the marginal pmfs of $X$ and $N$,
+show two unimodal `bell' shapes although the histogram of \texttt{x1}
+hints at asymmetry. The sample mean and variance of the two
+chains have also been calculated, allowing for a burn in of 500
+iterations.
+
+4. (d) The marginal distributions for $X$ and $N$ are derived from the
+joint distribution for $(X,N)$ given in (a):
+\begin{eqnarray*}
+  f(x) & \propto & \sum_{n=x}^\infty p^x(1-p)^{n-x}\frac{\lambda^n}{(n-x)!x!}\\
+       & \propto & \frac{(p\lambda)^x}{x!} \sum_{n=x}^\infty \frac{\left[(1-p)\lambda\right]^{n-x}}{(n-x)!}\\
+       & = & \frac{(p\lambda)^x}{x!}\\
+  X    & \sim & Poi(p\lambda)\\
+  \\
+  f(n) & \propto & \sum_{x=0}^n p^x(1-p)^{n-x}\frac{\lambda^n}{(n-x)!x!}\\
+       & \propto & \frac{\lambda^n}{n!} \sum_{x=0}^n \dbinom{n}{x}p^x(1-p)^{n-x}\\
+       & = & \frac{\lambda^n}{n!}\\
+   N   & \sim & Poi(\lambda)
+\end{eqnarray*}
+The sample means and variances obtained for the two chains
+\texttt{x2} and \texttt{n2} in part (c) are consistent with the
+theoretical means and variances of these marginal distributions. For
+$p=0.4$ and $\lambda=20$, $E[X]=Var(X)=p\lambda=8$ and
+$E[N]=Var(N)=\lambda=20$. The pmfs of the two marginal distributions
+are plotted over the histograms in Fig \ref{fig:Gibbs} and appear to
+be a good match (despite the histograms containing the burn in
+period). Further diagnostics could be carried out by carrying out a
+test of distributional equality such as a $\chi^2$ test or the
+Kolmogorov-Smirnov test.
+
+\end{document}
+

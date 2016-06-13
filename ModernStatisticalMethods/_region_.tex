@@ -1,0 +1,279 @@
+\message{ !name(cw.Rnw.tex)}
+\message{ !name(cw.Rnw) !offset(15) }
+
+\setkeys{Gin}{width=0.6\textwidth}
+
+1. (a) The cumulative distribution function (cdf) $F(x)$ corresponding to the
+Weibull random variable $X$ parameterised by $\rho > 0$ and $\kappa > 0$ is
+\begin{equation*}
+  F(x) = 1 - e^{-(\rho x)^\kappa}
+\end{equation*}
+for $x \ge 0$. Since $F(X)$ is uniformly distributed on $[0,1]$ and it
+is an increasing function on this interval, we have the result that
+for any $U \sim U(0,1)$, $F^{-1}(U)$ has cdf $F$. This result is the
+basis for simulation of $X$ via the  inversion method. It is
+sufficient to evaluate $F^{-1}(u)$:
+\begin{eqnarray*}
+  u & = & 1 - e^{-(\rho x)^\kappa} \\
+  e^{-(\rho x)^\kappa} & = & 1-u\\
+%  e^{-(\rho x)^\kappa} & = & U\\
+  (\rho x)^\kappa & = & -\ln(1-u) \\
+  x & = & \frac{1}{\rho} \{ -ln(1-u) \} ^{\frac{1}{\kappa}}\\
+  \end{eqnarray*}
+If $u\sim U(0,1)$ then so is $1-u$. To get the result we replace this with $U$ and $x$ by
+$X$ which is a random variable with cdf $F(x)$:
+\begin{equation*}
+  X = \frac{1}{\rho} \{ -ln(U) \} ^{\frac{1}{\kappa}}
+  \end{equation*}
+
+1. (b) A brief summary of the theory behind the acceptance-rejection
+(A-R) method:\\
+Assume $f(x)$ and $h(x)$ are PDFs such that (the envelope)
+$g(x)=kh(x)\ge f(x)$ $\forall x$, $k$ is typically the smallest
+positive constant which makes this true
+and $h(x)$ has support $[c,d]$. Then for random variables
+$X$ and $Y$ if  $Y|(X=x) \sim U(0,g(x))$, $X|(Y\le f(X))$ has PDF
+$f(x)$. In the A-R method, $f(x)$ is the PDF we wish to simulate from
+and $h(x)$  is a PDF we can simulate from directly.\\
+Here $f$ is given by
+\begin{equation*}
+  f(x) = \frac{1+\alpha}{\alpha(1+x)^2}
+\end{equation*}
+for $0\le x\le\alpha$ and $\alpha > 0$ and we are instructed to use
+the uniform distribution to construct the envelope, i.e.
+\begin{equation*}
+  h(x) = \frac{1}{\alpha}
+\end{equation*}
+for $0\le x\le\alpha$. Furthermore we set $k$ to be the smallest
+number that ensures $g(x)\ge f(x)$ for $0\le x\le\alpha$. Since $f(x)$
+is strictly decreasing in $x$ its maximum value is attained at $x=0$ where
+$f(0)=\alpha^{-1}(1+\alpha)$. Therefore we set $k=(1+\alpha)$ giving
+the envelope
+\begin{equation*}
+  g(x) = \frac{1+\alpha}{\alpha}
+\end{equation*}
+The outline for simulating a sequence $\{x_i\}$ of independent observations from
+$f(x)$ is as follows:
+\begin{enumerate}
+  \item Simulate a candidate observation $x_i \sim U(0,\alpha)$
+    i.e. from $h(x)$
+  \item Simulate $y_i \sim U(0,\alpha^{-1}(1+\alpha))$ i.e. $U(0,g(x_i))$
+
+  \item If $y_i\le f(x_i)$ accept $x_i$ otherwise reject it
+  \item Repeat the steps above
+\end{enumerate}
+
+The number of pseudorandom numbers generated per simulated observation
+can be evaluated by considering the probability $p$ of accepting a
+candidate observation:
+\begin{eqnarray*}
+ p & = &  \frac{\int_0^\alpha \! f(x) \, dx}{\int_0^\alpha \! g(x) \, dx}\\
+   & = &  \frac{\alpha^{-1}(1+\alpha) \int_0^\alpha \! (1+x)^{-2} \, dx}
+               {\alpha^{-1}(1+\alpha)\int_0^\alpha \!  \, dx} \\
+   & = &  \frac{1}{\alpha} \int_0^\alpha \! (1+x)^{-2} \, dx\\
+   & = &  \frac{1}{\alpha}\left[-(1+\alpha)^{-1} \right]^\alpha_0 \\
+   & = &  \frac{1}{1+\alpha}
+\end{eqnarray*}
+Therefore the expected number of candidate observations $x_i$ generated per
+simulated observation is $(1+\alpha)$, and since for each $x_i$ a
+$y_i$ is also generated, on average $2(1+\alpha)$ pseudorandom numbers
+are generated per observation simulated. Clearly, as $\alpha \rightarrow
+0$, $f(x)$ tends to the envelope, reducing the number of
+pseudorandom numbers required to simulate from it.
+
+\begin{figure}[h]
+\begin{center}
+<<echo=FALSE,output=FALSE,fig=TRUE>>==
+#R code for charts
+op <-par(pty="s",mar=c(4.5,4,3,3));
+alphas <- c(0.2,0.5,0.8);
+x <- list(seq(0,alphas[1],length.out=11),
+          seq(0,alphas[2],length.out=11),
+          seq(0,alphas[3],length.out=11)
+          );
+pdf <- function(x) {
+    alpha <- max(x);
+    (1+alpha)/(alpha*(1+x)^2);
+}
+y<-lapply(x,pdf);
+k<-do.call("rbind",lapply(y,max));
+plot(x[[3]],y[[3]],type="l",xlim=c(0,0.8),ylim=c(0,max(k)),xlab=expression(x),ylab="f(x), g(x)");
+lines(c(0,alphas[3]),c(k[[3]],k[[3]])); lines(c(alphas[3],alphas[3]),c(0,k[[3]]));
+lines(x[[2]],y[[2]],lty=2);
+lines(c(0,alphas[2]),c(k[[2]],k[[2]]),lty=2); lines(c(alphas[2],alphas[2]),c(0,k[[2]]),lty=2);
+lines(x[[1]],y[[1]],lty=3);
+lines(c(0,alphas[1]),c(k[[1]],k[[1]]),lty=3); lines(c(alphas[1],alphas[1]),c(0,k[[1]]),lty=3);
+abline(h=0,v=0,lty=5)
+legend("topright",as.character(alphas),lty=c(3,2,1),title="alpha");
+par(op);
+@
+\caption{$f(x)$ (curved) and $g(x)$ (horizontal) for $\alpha=$ 0.2,0.5
+and 0.8}
+\end{center}
+\end{figure}
+
+
+\pagebreak
+2. (a) The data were input into R to obtain the data frame \texttt{dugong}, and
+plotted.
+<<fig=FALSE>>=
+dugong=read.table(file(paste(path,"q2.txt",sep="")),header=T);
+plot(dugong$age,dugong$length);
+@
+\begin{figure}[h]
+  \begin{center}
+<<echo=FALSE,output=FALSE,fig=TRUE>>=
+dugong=read.table(file(paste(path,"q2.txt",sep="")),header=T);
+plot(dugong$age,dugong$length);
+@
+\end{center}
+\end{figure}
+The model is a nonlinear regression model because of the presence of
+both $\beta$ and $\gamma$ in the $\beta\gamma^{x_i}$ term. For
+strictly non-negative $x_i$ as is the case here, $\mu_i$ is
+bounded above by $\alpha$. This aspect of the model is consistent with
+the length data, which are bounded above at around 3 metres. Maximum adult dugong
+length is an interpretation of $\alpha$. Also, according to the model
+$\mu_i$ increases with $x_i$ and is concave, a feature also exhibited in the
+data. The extent of the concavity depends on $\gamma$, which can
+therefore  be interpreted as a measure of how sensitive growth rate is
+to age. $\gamma$ close to 0 corresponds to a much higher growth rate
+in youth than in old age. $\gamma$ close to 1 corresponds to a more
+stable growth rate through life. Finally $\alpha-\beta$ is the
+intercept of the model, the value of $\mu_i$ when $x_i=0$. This can be
+interpreted as the size of a newborn dugong, and given $\alpha$ is
+governed by $\beta$.
+
+2. (b)
+<<fig=FALSE>>=
+dugong.fit <- nls(length ~ alpha - beta * gamma^age, dugong,
+                  start=list(alpha=2.7,beta=1.0,gamma=0.8));
+dugong.fit;
+dugong.fit1 <- nls(length ~ alpha - beta * gamma^age, dugong,
+                   start=list(alpha=2.5,beta=0.8,gamma=0.6));
+dugong.fit1;
+plot(dugong$age, dugong$length);
+lines(dugong$age, predict(dugong.fit1));
+@
+\begin{figure}[h]
+  \begin{center}
+<<echo=FALSE,output=FALSE,fig=TRUE>>=
+plot(dugong$age, dugong$length);
+lines(dugong$age, predict(dugong.fit1));
+@
+\end{center}
+\end{figure}
+The output of the code shows the nonlinear least-square estimates of
+$\alpha$,$\beta$ and $\gamma$ starting from two different sets of
+starting values. The starting values appear not to be too critical as the
+same estimates are arrived at in each case. The plot shows the fitted
+values $\hat\mu_i$ against $x_i$, shown as a line (with linear
+interpolation between data points). The sum of squared residuals
+$(y_i-\hat\mu_i)^2$ has been minimised (via the Gauss-Newton numerical
+method) by these parameter estimates. The model appears to
+fit well with no (visually) discernable pattern in the
+residuals. Further analysis of the residuals could be carried out such
+as plots and tests of randomness. We also calculate the ratio of
+the model sum-of-squares to the total-sum-of-squares.
+<<>>=
+total_sum_sq <- (nrow(dugong)-1)*var(dugong$length);
+1-deviance(dugong.fit1)/total_sum_sq;
+@
+$89\%$ of the variance in dugong length is accounted for by the model
+which is a good fit.
+
+($\hat\alpha=$) 2.66 metres is the estimated upper bound for dugong
+length. ($\hat\alpha$-$\hat\beta$=) 1.69 metres is the estimated
+lower bound for dugong length. Also $\hat\gamma=$0.87 corresponds to a
+growth rate that is highest before the age of 10, subsequently falling to a
+visually lower rate. Estimates of growth rates could be obtained by
+linearising parts of the fitted response function and calculating its
+gradient.
+
+To carry out classical inference about the precision of these parameter
+estimates we would need to make distributional assumptions about the
+residuals. Furthermore since the model is nonlinear, we cannot apply
+the machinery associated with OLS estimators here.
+
+2. (c) The following modified code was run in R:
+<<eval=FALSE,echo=TRUE,output=FALSE>>=
+library(boot)
+set.seed(965) #Starting at seed 964 causes nls() in R to not converge
+dugong.fit <- function(d) {
+    coef(nls(length ~ alpha - beta * gamma^age, d,
+          start=list(alpha=2.5,beta=0.8,gamma=0.6)));
+}
+row.fun <- function(d,i) {
+ dugong.fit(d[i,]);
+}
+dugong.boot <- boot(dugong,row.fun,R=1000,stype="i");
+@
+
+<<echo=FALSE,output=TRUE>>=
+print(dugong.boot);
+@
+
+\begin{figure}[h]
+  \begin{center}
+<<echo=FALSE,outout=FALSE,fig=TRUE,height=7,width=12>>=
+plot(dugong.boot,1);
+@
+<<echo=FALSE,outout=FALSE,fig=TRUE,height=7,width=12>>=
+plot(dugong.boot,2);
+@
+<<echo=FALSE,outout=FALSE,fig=TRUE,height=7,width=12>>=
+plot(dugong.boot,3);
+@
+\caption{The output of the \texttt{plot} function applied to the
+  \texttt{dugong.boot} object for each of $\alpha$, $\beta$ and
+  $\gamma$ respectively. For each parameter there is a histogram
+  of the bootstrap distribution and a $QQ$-plot vs quantiles of the
+  standard normal.}
+\label{fig:plotboot}
+\end{center}
+\end{figure}
+
+Empirical bootstrap distributions for the model parameters $\alpha$, $\beta$ and
+$\gamma$ (\texttt{t1*},\texttt{t2*} and \texttt{t3*} in the output)
+have been computed in this analysis. The idea behind this is
+that for a random sample from a population, in the absence of any
+other knowledge of that population, the distribution in the sample is
+the best guide to the distribution in the population. The population
+distribution is approximated by resampling (with replacement) from the
+sample. More specifically, the non-linear least squares estimates for
+$\alpha$, $\beta$ and $\gamma$ have been calculated for 1000 samples
+of the bivariate (age,length) data. Each sample (of equal size to the
+original data set) has been obtained by sampling with replacement from
+the original data set. The bootstrap distribution for each parameter
+is based on these 1000 resampled estimates.
+
+The bias and standard error of each of the parameter estimates have been
+estimated from the bootstrap resamples, the bias as follows, using the
+bias of $\hat\alpha$, $b(\alpha)=E[\hat\alpha]-\alpha$, as an example:
+\begin{equation*}
+  \hat{b}(\alpha)= \frac{1}{1000}\sum_{i=1}^{1000}\hat\alpha_i' - \hat\alpha  \\
+\end{equation*}
+where $\hat\alpha_i'$ is the estimate of $\alpha$ from the $i$th bootstrap
+resample and $\hat\alpha$ is the estimate from the original
+sample. The rationale for this is that the distribution of
+$(\hat\alpha_i'-\hat\alpha)$ mimics that of
+$\hat\alpha-\alpha$. $\hat{b}(\alpha)$ and $\hat{b}(\beta)$ are
+positive suggesting $\alpha$ and $\beta$ may be slightly overestimated
+by $\hat\alpha$ and $\hat\beta$. The amounts in each case are small:
+the bias represents about 1.0 and 1.4cm
+respectively. $\hat{b}(\gamma)$ is very small and negative.
+
+Applying the \texttt{plot} function to the \texttt{dugong.boot} object
+for each parameter gave the output in Fig \ref{fig:plotboot}. For each
+parameter there is a histogram of the bootstrap distribution and a
+$QQ$-plot vs quantiles of the standard normal.
+
+Estimate 95\% percentile confidence intervals: empirical and BCa (mention assumption)
+
+Overall conclusion from the analysis: inference about the model paramters
+fitted in by the nls method
+
+ \end{document}
+
+
+\message{ !name(cw.Rnw.tex) !offset(-279) }

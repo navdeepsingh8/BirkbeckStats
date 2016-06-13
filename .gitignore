@@ -6,4 +6,12 @@ cache/
 !/.gitignore
 *.RData
 *.RDS
-
+*.eps
+*.dvi
+*.aux
+*.bbl
+*.blg
+*.log
+*.zip
+*.gz
+*.toc

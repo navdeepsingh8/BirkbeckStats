@@ -1,0 +1,280 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{fancyhdr}
+\usepackage[left=2.5cm,top=3.5cm,headheight=2cm,right=3cm,bottom=3cm]{geometry}
+\usepackage{bm}
+\usepackage{amsmath,amssymb}
+\pagestyle{fancyplain}
+\lhead[\thepage]{Navdeep Daheley\\MSc Applied Statistics}
+\rhead[\thepage]{Statistical Analysis B - Coursework 1 - Question \thesection\\ \today}
+\setlength{\parskip}{0.3cm}
+\setlength{\parindent}{0cm}
+
+<<devoff,echo=FALSE,results=hide,eval=FALSE>>=
+dev.off();
+@
+
+\begin{document}
+
+%Question 1
+\section{Question 1}
+{\bf (a)} The bark deposit data ${\bf X}$ is stored in the data frame \texttt{bark.dep} and the list \texttt{bark.stats} is set up containing the sample mean vector, covariance matrix and correlation matrix. Sample standard deviations are also calculated for each direction.
+<<>>=
+#Load data
+N <- c(72,60,56,41,32,30,39,42,37,33,32,63,54,47);
+E <- c(66,53,57,29,32,35,39,43,40,29,30,45,46,51);
+S <- c(76,66,64,36,35,34,31,31,31,27,34,74,60,52);
+W <- c(77,63,58,38,36,26,27,25,25,36,28,63,52,43);
+bark.dep <- as.data.frame(cbind(N,E,S,W));
+bark.dep
+#Calculate mean, covariances and correlations
+bark.stats=list();
+bark.stats$mean <- mean(bark.dep);
+bark.stats$cov  <- cov(bark.dep);
+bark.stats$cor <- cor(bark.dep);
+bark.stats
+#Calculate standard deviations
+sqrt(diag(bark.stats$cov))
+@
+The four sample means fall into the range $[
+\Sexpr{min(bark.stats$mean)}
+,
+\Sexpr{max(bark.stats$mean)}
+]$ representing E and S respectively. This range does not seem very large relative to the sample standard deviations. S and W show higher variance in the sample than N and E. S has the highest sample variance of $
+\Sexpr{format(max(diag(bark.stats$cov)),digits=3)}
+$ and E the lowest at $
+\Sexpr{format(min(diag(bark.stats$cov)),digits=3)}
+$. The off diagonals of the sample covariance matrix (and hence the sample correlation matrix) are all positive. The sample correlations are large and all above $0.9$ except for those between E and the other directions which are in the range $[0.77,0.87]$.
+\\
+
+{\bf (b)} The $4$ principal components $Y_i$ of the random variables $\mathbf{X}$ are linear combinations the $4$ $\mathbf{X}_j$s. The coefficient $a_{ij}$ is equal to the $j$th entry of the $i$th eigenvector of the sample covariance matrix $\mathbf{S}$. More succinctly, the $4$-by-$1$ vector of principal components can be expressed as
+\begin{equation}
+\mathbf{Y = A'X}
+\label{eigeneqn}
+\end{equation}
+where $\mathbf{A}$ is the $4$-by-$4$ matrix whose columns are the eigenvectors of $\mathbf{S}$. $\mathbf{A}$ is calculated and stored in the array \texttt{bark.eig.cov\$vectors}. The amount of variance accounted for by each principle component is also calculated and stored in the array \texttt{bark.eig.cov\$values}. These are also expressed as proportions.
+<<>>=
+bark.eig.cov <- eigen(bark.stats$cov);
+bark.eig.cov$vectors
+bark.eig.cov$values
+bark.eig.cov.prop <- bark.eig.cov$values/sum(bark.eig.cov$values);
+bark.eig.cov.prop
+@
+\\
+
+{\bf (c)} The coefficients and variances of the principal components based on the sample correlation matrix are calculated and saved in the arrays \texttt{bark.eig.cor\$vectors} and \texttt{bark.eig.cor\$values}.
+<<>>=
+bark.eig.cor <- eigen(bark.stats$cor);
+bark.eig.cor$vectors
+bark.eig.cor$values
+bark.eig.cor.prop <- bark.eig.cor$values/sum(bark.eig.cor$values);
+bark.eig.cor.prop
+@
+The first component, which accounts for $
+\Sexpr{format(100*bark.eig.cor.prop[1],digits=3)}
+$\% of the total variance (of these {\em correlation-based} principal components) can be interpreted as a `weight' measure of the total weight of bark deposits, because of the equal signs on the coefficients. The second component can be interpreted as a measure of `symmetry' comparing the relative weight of deposit in the E direction with the others. It accounts for $
+\Sexpr{format(100*bark.eig.cor.prop[2],digits=3)}
+$\% of the total variance. Similarly, the third and fourth components measure the relative weight of deposits in the N and S directions respectively.\\
+This interpretation has similarities with a possible interpretation of the principal components derived from the covariance matrix. One difference is that in those components, the second component is better interpreted as comparing the relative weight of deposits in both E and N with S and W. In principle the covariance-based components are preferable, since the deposit measurements are all in the same units. Furthermore, the sample variances of each direction are not orders of magnitude apart. An attractive feature of the covariance-based components is that they represent orthogonal transformations of the {\em original} variables, whereas the correlation-based components do not.\\
+The proportions of explained variance from both sets of principal components are presented in figure \ref{fig:princomp}.
+\begin{figure}[h]
+\begin{centering}
+<<echo=FALSE,fig=TRUE>>=
+op=par(pty="s");
+plot(bark.eig.cov.prop,type="l",col=1,
+     ylab="Proportion of variance",xlab="Principal component",lab=c(4,5,1));
+points(bark.eig.cor.prop,type="l",col=1,lty=4,lwd=1.5);
+legend("topright",legend=c("Covariance","Correlation"),
+       col=1,lty=c(1,4),lwd=c(1,1.5),title="Component type");
+grid();
+par(op);
+@
+\caption{Proportion of variance accounted per principal component}
+\label{fig:princomp}
+\end{centering}
+\end{figure}
+\\
+
+
+%Question 2
+\clearpage
+\section{Question 2}
+
+{\bf (a)}\\
+(i)
+\begin{equation}
+\mathbf{C'X_2} \sim N_2(\mathbf{C'}\bm{\mu},\mathbf{C'\Sigma C})
+\end{equation}
+
+(ii)
+\begin{eqnarray}
+\mathbf{\overline{X}}    & \sim & N_4(\bm{\mu},\tfrac{1}{16}\mathbf{\Sigma})\nonumber  \\
+\mathbf{C'\overline{X}}  & \sim & N_2(\mathbf{C'}\bm{\mu},\tfrac{1}{16}\mathbf{C'\Sigma C})
+\end{eqnarray}
+
+(iii)
+\begin{equation}
+W \sim W_4(15,\mathbf{\Sigma})
+\end{equation}
+where $W_4(15,\mathbf{\Sigma})$ is the central Wishart distribution on $15$ degrees of freedom with $4$ dimensional variance matrix $\mathbf{\Sigma}$.\\
+
+(iv)
+\begin{equation}
+\mathbf{C'}W\mathbf{C} \sim W_2(15,\mathbf{C'\Sigma C})
+\end{equation}\\
+
+{\bf (b)} The elements of the sample mean vector $\mathbf\overline{x}$ are increasing, which may be evidence of regular facial growth, on average, in boys between the ages of 8 and 14. There is no clear trend in the sample variances. All off diagonal covariances are positive which may be evidence that a larger (smaller) than average measurement at age 8 is followed by similarly larger (smaller) than average measurements at higher ages.\\
+
+We seek seek a matrix of constants $\mathbf{C}$ to test the null hypothesis that the population mean vector $\bm{\mu}$ represents a growth trend that is linear with age over this range, i.e. $H_0 : \mathbf{C'}\bm{\mu}=\mathbf{0}$ against $H_1 : \mathbf{C'}\bm{\mu} \ne \mathbf{0}$. The null hypothesis is equivalent to a set of equations
+\begin{equation}
+(\mu_i-\mu_j) = \beta(a_i-a_j)
+\label{setofeqns}
+\end{equation}
+for some positive $\beta$ and ages $14\ge a_i > a_j \ge 8$. Therefore each column of $\mathbf{C}$ can be formed from the coefficients of the $\mu_k$s after taking a linear combination of these equations satisfying
+\begin{enumerate}
+\item a zero beta term
+\item coefficients (on the $\mu_k$s) summing to zero
+\item coefficients orthogonal to those of other column of $\mathbf{C}$
+\end{enumerate}
+The columns of $\mathbf{C}$ then represent the coefficients of two orthogonal contrasts for $\bm{\mu}$. Let
+\begin{equation*}
+\mathbf{C}=
+\begin{pmatrix} 
+-1 & -1 \\
+ 1 &  3 \\
+ 1 & -3 \\
+-1 &  1
+\end{pmatrix}
+\end{equation*}\\
+ The first contrast is $(\overline{x}_2-\overline{x}_1)-(\overline{x}_4-\overline{x}_3)$. Under $H_0$ the measurement increase from age $8$ to $10$ should not be very different to the measurement increase from age $12$ to $14$ because each of these pairs of ages is equally spaced in years. Therefore under $H_0$ the estimated contrast should be close to $0$. The second contrast is $(\overline{x}_4-\overline{x}_1)-3(\overline{x}_3-\overline{x}_2)$. The period $8$ to $14$ is three times the length of the period $10$ to $12$ and so under $H_0$ the estimate of the contrast should also be close to $0$. Furthermore the columns of $\mathbf{C}$ are orthogonal.\\
+
+The statistic $T^2$ is used to test $H_0$:
+\begin{equation}
+\label{tsquared}
+T^2 = 16\mathbf{\overline{x}'C(C'SC)}^{-1}\mathbf{C'\overline{x}}
+\end{equation}
+%Under $H_0$, $T^2$ is distributed as the Hotelling $T^2$ distribution with $15$ degrees of freedom. Furthermore,
+Under $H_0$
+\begin{eqnarray}
+T^2                                      & \sim & T^2_2(15)
+\end{eqnarray}
+Furthermore,
+\begin{eqnarray}
+\left(\frac{15-2+1}{15\times2}\right)T^2 & \sim & F_{2,15-2+1} \nonumber \\
+\label{distresult}
+\left(\frac{14}{30}\right)T^2            & \sim & F_{2,14}
+\end{eqnarray}
+Therefore, $H_0$ is rejected at the $5\%$ level if for the observed value the statistic $T_{obs}^2$,
+\begin{equation*}
+\left(\frac{14}{30}\right)T_{obs}^2 > F_{2,14}(5\%)
+\end{equation*}
+
+The sample means and covariances $\mathbf{\overline{x}}$ and $\mathbf S$ are stored in the matrices \texttt{dist.mean} and \texttt{dist.cov} respectively, and the contrast matrix $\mathbf C$ in the matrix \texttt{dist.contr}.
+%Load sample mean and covariances into R and the contrasts matrix
+<<echo=FALSE>>=
+age=matrix(seq(8,14,2));
+dist.mean =matrix(c(22.88,23.81,25.72,27.47));
+dist.cov  =matrix(c(6.017,2.292,3.629,1.613,
+                    2.292,4.563,2.194,2.810,
+                    3.629,2.194,7.032,3.241,
+                    1.613,2.810,3.241,4.349),4);
+dist.contr = cbind(c(-1,1,1,-1),c(-1,3,-3,1));
+@
+<<>>=
+dist.mean
+dist.cov
+dist.contr
+@
+
+Next the means are plotted against age in figure \ref{fig:measurementplot} for visual inspection. Informally, a linear relationship does not seem implausible given this plot.
+%Data display
+\begin{figure}[t]
+\begin{centering}
+<<echo=FALSE,fig=TRUE>>=
+op=par(pty="s");
+plot(age,dist.mean,type="b",ylab="Measurement (mm)",xlab="Age (years)");
+grid();
+par(op);
+@
+\label{fig:measurementplot}
+\caption{Measurement against age}
+\end{centering}
+\end{figure}\\
+
+Finally $T^2_{obs}$ is calculated according to equation \ref{tsquared} and its adjusted value compared according to the distributional result in equation \ref{distresult}.
+ 
+%Calculate T^2 statistic and check against F dist
+<<keep.source=TRUE>>=
+t.sq.obs <- 16*crossprod(dist.mean,dist.contr)%*%
+               solve(crossprod(dist.contr,dist.cov)%*%
+                     dist.contr,
+                     crossprod(dist.contr,dist.mean));
+t.sq.obs.adj <- (14/30)*as.numeric(t.sq.obs);
+t.sq.obs.adj
+f.crit <- qf(1-0.05,2,14);
+f.crit
+pr.t.sq.obs <- 1-pf(t.sq.obs.adj,2,14);
+pr.t.sq.obs
+@
+
+The observed value of $
+\Sexpr{format(t.sq.obs.adj,digits=3)}
+$ is smaller than the the $F_{2,14}(5\%)$ critical value of $
+\Sexpr{format(f.crit,digits=3)}
+$ and so $H_0$ cannot be rejected on the basis of this statistic. This result is in line with the intuition from figure \ref{fig:measurementplot}.\\
+
+{\bf (c)} $H_0$ can be tested using univariate $t$-tests on individual contrasts. For a given contrast of length $m$ with coefficients $c_i$ the test statistic $t$ is calculated from the sample means $\overline{x}_i$ and sample variances $s_i^2$ assuming all sample sizes equal to $n$:
+\begin{equation}
+t=\frac{\sqrt{\frac{n}{\sum_{i=1}^{m}c_i^2}}\sum_{i=1}^{m}c_i\overline{x}_i}
+       {\sqrt{\frac{1}{m}\sum_{i=1}^{m}s_i^2}}
+\label{unittest}
+\end{equation}
+Under $H_0$ and the two assumptions of independent populations with equal variances underlying each sample,
+\begin{equation}
+t \sim t_{m(n-1)}
+\end{equation}
+In our case the contrast coefficients are given by the columns of $\mathbf{C}$, $m=4$ and $n=16$. The sample means are given, and the sample variances are the diagonals of the sample covariance matrix. A clear concern about this test is the assumption of equal variances between samples, as there is no strong evidence to support this assumption. The multivariate test does not suffer this caveat. Continuing, two sided tests at the $5$\% level are carried out for each column:
+<<keep.source=TRUE>>=
+#Function to carry out univariate t-test on a contrast
+uni.t.test <- function(means,vars,contr,n,p) {
+  t.obs <- sqrt(n/sum(contr^2))*sum(means*contr)/
+           sqrt(sum(vars)/length(contr));
+  t.crit <- qt(1-p/2,length(contr)*(n-1));
+  p.obs <- 1-pt(abs(t.obs),length(contr)*(n-1));
+  data.frame(t.obs=t.obs,t.crit=t.crit,reject=(abs(t.obs)>t.crit),p.obs=p.obs);
+}
+#Test first column of C
+uni.t.test(dist.mean,diag(dist.cov),dist.contr[,1],16,0.05);
+#Test second column of C
+uni.t.test(dist.mean,diag(dist.cov),dist.contr[,2],16,0.05);
+@
+
+$H_0$ cannot be rejected at the $5$\% level by either test result, which is consistent with the test result from part (b). The observed $p$-values for the two univariate statistics are slightly smaller than that for the multivariate test, however the observed statistics are comfortably distant from the rejection region. This suggests that testing several contrasts i.e. growth differences across several different age pairs simultaneously, does not further help to reject the null hypothesis of a linear growth trend, over and above using a single contrast. Perhaps also that the covariance in the measurements data does not further help to reject the null hypothesis of a linear growth trend, over and above the sample means and variances.
+
+{\bf (d)} Along the same lines as before, the null hypothesis $H_0$ of zero linear growth with age can be tested using a contrast vector $\mathbf{a}$ composed from a linear combination of equations \ref{setofeqns}, each of which represent linear growth between two ages. The equations should be combined in such a way that $\mathbf{a'}\bm{\mu}=0$ should hold under $H_0$ but not under the alternative of non-zero linear growth. This can be achieved by adding any two equations which have equal $\beta$ coefficients. Alternatively equations can be scaled to have equal $\beta$ coefficients before adding.
+Let $\mathbf{a}$ be
+\begin{equation*}
+\mathbf{a} = (-1,1,-1,1)^T
+\end{equation*}
+which corresponds to $(\mu_2-\mu_1)+(\mu_4-\mu_3)$. The test statistic of equation \ref{unittest} is used to test $H_0$ at the $5$\% level:
+<<keep.source=TRUE>>=
+a.contr=c(-1,1,-1,1);
+uni.t.test(dist.mean,diag(dist.cov),a.contr,16,0.05);
+@
+The hypothesis of zero linear growth is rejected at the $5$\% level, a result which is consistent with those from parts (b) and (c), where the hypothesis of positive linear growth could not be rejected.
+
+{\bf (e)} The null hypothesis $H_0$ of zero quadtratic growth with age is consistent with a set of equations
+\begin{equation}
+(\mu_i-\mu_j) = \gamma(a_i^2-a_j^2)
+\end{equation}
+for some positive $\gamma$ and ages $14\ge a_i > a_j \ge 8$. Using a similar argument as in part (d), a single vector of contrasts $\mathbf{b}$ can be used to test $H_0$ by summing two of these equations which have equal $\gamma$ coefficients.
+\begin{equation*}
+\mathbf{b}=(-1,1,-36/52,36/52)^T
+\end{equation*}
+corresponds to such a combination, of the measurement differences between ages $8$ and $10$, and $12$ and $14$. Once again the test statistic of equation \ref{unittest} can be used to test $H_0$ at the $5$\% level:
+<<keep.source=TRUE>>=
+b.contr=c(-1,1,-36/52,36/52);
+uni.t.test(dist.mean,diag(dist.cov),b.contr,16,0.05);
+@
+The hypothesis of zero quadratic growth is rejected at the $5$\% level. Another glance at figure \ref{fig:measurementplot} and we can see that the growth between ages $8$ and $10$ is somewhat lower than in the subsequent $2$-year periods.
+
+\end{document}
