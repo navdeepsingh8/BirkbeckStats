@@ -1,0 +1,36 @@
+admin
+functions - contains all reusable functions
+
+data description and exploratory
+sample.table - produces a sample table of the raw data
+DST.adjust - table of first and last minutes of the week
+missing.data.summary - what it says on the tin
+
+daily data analysis
+[marginal distribution analysis of returns]
+taylor effect - testing the taylor effect from Ding and Granger
+arch.effects - study dependence of weekly and daily volatility
+daily.vol.forecast - forecast vol using exp smoothing
+stdised.acfs - acfs of standardised measures
+
+range decomposition
+range.decomp - decomposition of range autocovariance
+contingency - contingency table analysis of daily returns and ranges
+
+long memory
+sim.components - simulatel from a multi-component ARMA model
+
+realized measures
+vol.aggregate - study dependence of aggregated intra-week volatility
+compare.realized - correlation of abs return and range to realized vol
+
+intraday analysis of returns
+dist.analysis - distributional analysis of 1 minute returns
+outliers - analysis of heavy tails of returns
+intra.week.vol - estimates intra-week volatility seasonality
+
+
+
+
+
+

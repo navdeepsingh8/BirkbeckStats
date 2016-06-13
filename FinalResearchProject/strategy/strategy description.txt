@@ -1,0 +1,30 @@
+effect:
+- capture tendency for large jumps to revert by the end of trading on monday
+
+risk appetite:
+- want to constrain maximum loss on any given day, without sacrificing return opportunities
+
+entry: start of day
+exit: end of day
+return signal: direction and size of stdised jump
+vol signal: GK + size of sdised jump 
+trading strat:
+only take positions for significant ret signal (top and bottom quintiles)
+size the position according to either
+a) fixed volatility: 1 x vol forecast + 0.003 x stdised jump size
+b) expected intra-day drawdown: 1.15 x vol forecast + 0.005 x stdised jump size
+
+stop loss: additional exit strategy, to limit max drawdown
+calibrate based on performance improvement
+only add it if it improves performance
+
+additional exit strategies:
+- consider profit targets
+
+additional trade selection / entry strategies:
+- take into account previous supp/resist
+
+
+
+
+

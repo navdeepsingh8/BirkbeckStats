@@ -1,0 +1,9 @@
+*.pdf
+*.jpg
+*.png
+cache/
+.*
+!/.gitignore
+*.RData
+*.RDS
+

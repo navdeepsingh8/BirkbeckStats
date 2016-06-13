@@ -1,0 +1,32 @@
+Todo:
+
+Report the p-values for Ljung box test on 1 minute volatility measures - done
+Discuss the mechanism through which the data arises - broker quotes, order book etc. - done
+Check robustness of weekly volatility autocorrelation result to different week starting points - done
+Check robustness of average volatility result to different frequency of minute data (5,30,60 etc. for example) - done
+Read Granger-Ding paper and related literature for ideas - done
+
+1/7/2013
+- Try the variance ratio stat in place of Ljung-Box, and also find stat that explicitly tests for long memory in a series (e.g. first negative autocorrelation)
+- Make a list of the market microstructure issues that might affect an analysis of high frequency data: bid-ask bounce, infrequent trading, etc.
+
+5/7/2013
+- Test for Taylor effect in daily returns and ranges - done
+
+29/7/2013
+
+1. Section 3.3 - try fitting a simple GARCH model to returns and see if this eliminates dependence in ranges - put it into section 4
+2. Simplify section 4.4 - momentum and reversals:
+a) incorporate premax into defns - done
+b) simplify tables - done
+c) incorporate heterosced model into estimates - done
+3.  Incorporate range decomposition into section 4.4 - done
+4. Simplify section on realized measures - done
+
+31/07/2013
+1. estimating order of fractional integration of daily range
+2. choose a suitable forecasting model and compare of out-of-sample vol forecast performance using abs return, hilo.range, rlzd.vol and rlzd.range
+3. next steps: think about what causes fractional integration - model the intraday absolute return dynamics after removing intraday seasonality
+
+
+ 
