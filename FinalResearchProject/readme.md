@@ -41,7 +41,7 @@ __vol.aggregate__ - study dependence of aggregated intra-week volatility
 
 __compare.realized__ - correlation of abs return and range to realized vol
 
-# Analysis of intraday return
+# Analysis of intraday returns
 
 __dist.analysis__ - distributional analysis of 1 minute returns
 
