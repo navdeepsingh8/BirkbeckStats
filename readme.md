@@ -14,4 +14,4 @@ Some of the `R` code I wrote for various courseworks and projects during my [MSc
 * [_k_-nearest neighbours](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm)
 * [Neural network](https://en.wikipedia.org/wiki/Artificial_neural_network)
 
-[__Final year research project__](FinalYearResearchProject): Final year research project where I investigated the empirical properties of range-based (OHLC) volatility estimators as compared with return-based and realized volatility estimators using a data set of 1 minute EURUSD OHLC prices.
+[__Final year research project__](FinalYearResearchProject/): Final year research project where I investigated the empirical properties of range-based (OHLC) volatility estimators as compared with return-based and realized volatility estimators using a data set of 1 minute EURUSD OHLC prices.
